@@ -24,6 +24,9 @@ public class MecanumDrive {
     PID yControl = new PID();
     HeadingPID headingControl = new HeadingPID();
 
+    public double currentX = localizer.getPose().getX();
+    public double currentY = localizer.getPose().getY();
+
     double startX = 0, startY = 0, startHeading = 0;
 
     double x = startX;
@@ -60,7 +63,7 @@ public class MecanumDrive {
         startHeading = pose.getHeading(AngleUnit.DEGREES);
     }
 
-    public void followTrajectory(Pose2D pose){
+    public void setTargetPose(Pose2D pose){
         xControl.target = pose.getX(DistanceUnit.CM);
         yControl.target = pose.getY(DistanceUnit.CM);
         headingControl.target = pose.getHeading(AngleUnit.DEGREES);
@@ -72,6 +75,22 @@ public class MecanumDrive {
 
     public boolean isAtTarget(){
         return xControl.isAtTarget(localizer.getPose().getX()) && yControl.isAtTarget(localizer.getPose().getY()) && headingControl.isAtTarget(localizer.getPose().getHeading());
+    }
+
+    public Pose2D getCurrentPose(){
+        return new Pose2D(DistanceUnit.CM, localizer.getPose().getX(), localizer.getPose().getY(), AngleUnit.DEGREES, localizer.getPose().getHeading());
+    }
+
+    public Pose2D getTargetPose(){
+        return new Pose2D(DistanceUnit.CM, xControl.target, yControl.target, AngleUnit.DEGREES, headingControl.target);
+    }
+
+    public double errorX(){
+        return getTargetPose().getX(DistanceUnit.CM) - getCurrentPose().getX(DistanceUnit.CM);
+    }
+
+    public double errorY(){
+        return getTargetPose().getY(DistanceUnit.CM) - getCurrentPose().getY(DistanceUnit.CM);
     }
 
     public void update(){
