@@ -2,11 +2,13 @@ package pidToPoint;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import config.PidConstants;
+
 public class PID {
 
-    double kP = 0.025;
-    double kI = 0.0001;
-    double kD = 0.002;
+    double kP = PidConstants.kP;
+    double kI = PidConstants.kI;
+    double kD = PidConstants.kD;
 
     double target = 0;
     double encoderPosition = 0;

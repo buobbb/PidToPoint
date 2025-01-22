@@ -9,6 +9,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
+import config.Motors;
+
 public class MecanumDrive {
 
     DcMotorEx leftFrontMotor;
@@ -28,12 +30,14 @@ public class MecanumDrive {
     double y = startY;
     double heading = startHeading;
 
+    public double speed = 0.5;
+
     public MecanumDrive(HardwareMap hardwareMap) {
 
-        leftFrontMotor = hardwareMap.get(DcMotorEx.class, "m1");
-        rightFrontMotor = hardwareMap.get(DcMotorEx.class, "m2");
-        leftRearMotor = hardwareMap.get(DcMotorEx.class, "m3");
-        rightRearMotor = hardwareMap.get(DcMotorEx.class, "m4");
+        leftFrontMotor = hardwareMap.get(DcMotorEx.class, Motors.leftFrontMotor);
+        rightFrontMotor = hardwareMap.get(DcMotorEx.class, Motors.rightFrontMotor);
+        leftRearMotor = hardwareMap.get(DcMotorEx.class, Motors.leftRearMotor);
+        rightRearMotor = hardwareMap.get(DcMotorEx.class, Motors.rightRearMotor);
 
         leftFrontMotor.setDirection(DcMotorEx.Direction.REVERSE);
         leftRearMotor.setDirection(DcMotorEx.Direction.REVERSE);
@@ -50,16 +54,20 @@ public class MecanumDrive {
 
     }
 
-    public void setStartPose(double startX, double startY, double startHeading){
-        this.startX = startX;
-        this.startY = startY;
-        this.startHeading = startHeading;
+    public void setStartPose(Pose2D pose){
+        startX = pose.getX(DistanceUnit.CM);
+        startY = pose.getY(DistanceUnit.CM);
+        startHeading = pose.getHeading(AngleUnit.DEGREES);
     }
 
     public void followTrajectory(Pose2D pose){
         xControl.target = pose.getX(DistanceUnit.CM);
         yControl.target = pose.getY(DistanceUnit.CM);
         headingControl.target = pose.getHeading(AngleUnit.DEGREES);
+    }
+
+    public void setSpeed(double speed){
+        this.speed = speed;
     }
 
     public boolean isAtTarget(){
@@ -76,10 +84,10 @@ public class MecanumDrive {
         double xRotated = x * Math.cos(Math.toRadians(localizer.getPose().getHeading())) - y * Math.sin(Math.toRadians(localizer.getPose().getHeading()));
         double yRotated = x * Math.sin(Math.toRadians(localizer.getPose().getHeading())) + y * Math.cos(Math.toRadians(localizer.getPose().getHeading()));
 
-        leftFrontMotor.setPower(xRotated + yRotated + heading);
-        leftRearMotor.setPower(xRotated - yRotated + heading);
-        rightFrontMotor.setPower(xRotated - yRotated - heading);
-        rightRearMotor.setPower(xRotated + yRotated - heading);
+        leftFrontMotor.setPower((xRotated + yRotated + heading) * speed);
+        leftRearMotor.setPower((xRotated - yRotated + heading) * speed);
+        rightFrontMotor.setPower((xRotated - yRotated - heading) * speed);
+        rightRearMotor.setPower((xRotated + yRotated - heading) * speed);
 
         //se opreste cand ajunge la target
         if(isAtTarget()){
